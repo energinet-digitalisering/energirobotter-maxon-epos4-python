@@ -9,7 +9,6 @@ class EPOS4:
         ctypes.cdll.LoadLibrary(path)
         self.epos = ctypes.CDLL(path)
 
-        self.state = "undefined"
         self.node_id = 1  # Node ID must match with Hardware Dip-Switch setting of EPOS4
         self.keyhandle = 0
 
@@ -18,7 +17,7 @@ class EPOS4:
 
         if p_error_code.value != 0x0:
             self.epos.VCS_GetErrorInfo(p_error_code.value, p_error_info, 40)
-            print("Error Code %#5.8x in State: %s" % (p_error_code.value, self.state))
+            print("Error Code %#5.8x" % p_error_code.value)
             print("Description: %s" % p_error_info)
             return False
 
@@ -50,7 +49,6 @@ class EPOS4:
 
     def open_port(self):
         print("node_id: %d" % self.node_id)
-
         p_error_code = ctypes.c_uint()
 
         # Open USB Port
@@ -77,7 +75,7 @@ class EPOS4:
         ret = self.epos.VCS_CloseDevice(self.keyhandle, ctypes.byref(p_error_code))
 
         if ret == 1:
-            self.eval_error_pass(self.state, p_error_code)
+            self.eval_error_pass(p_error_code)
             return True
         else:
             print("Error CloseDevice")
@@ -139,7 +137,7 @@ class EPOS4:
         )
 
         if ret == 1:
-            if self.eval_error_pass(self.state, p_error_code):
+            if self.eval_error_pass(p_error_code):
 
                 self.epos.VCS_GetDisableState(
                     self.keyhandle,
