@@ -92,16 +92,6 @@ class EPOS4:
         pls_enabled = ctypes.c_bool()
         p_error_code = ctypes.c_uint()
 
-        # Set Operation Mode PPM
-        ret = self.epos.VCS_ActivateProfilePositionMode(
-            self.keyhandle, self.node_id, ctypes.byref(p_error_code)
-        )
-
-        # Profile Velocity=500rpm / Acceleration=1000rpm/s / Deceleration=1000rpm/s
-        ret = self.epos.VCS_SetPositionProfile(
-            self.keyhandle, self.node_id, 500, 1000, 1000, ctypes.byref(p_error_code)
-        )
-
         # Check Device Error before enabling
         if self.device_error_pass():
             # Enable Device
@@ -163,6 +153,26 @@ class EPOS4:
                 return False
         else:
             print("Error SetDisableState")
+            return False
+
+    def config_ppm(self, profile_velocity=500, acceleration=1000, deceleration=1000):
+        p_error_code = ctypes.c_uint()
+
+        ret = self.epos.VCS_SetPositionProfile(
+            self.keyhandle,
+            self.node_id,
+            profile_velocity,
+            acceleration,
+            deceleration,
+            ctypes.byref(p_error_code),
+        )
+
+        if ret == 1:
+            self.eval_error_pass(p_error_code)
+            return True
+
+        else:
+            print("Error SetPositionProfile")
             return False
 
     def get_position(self):
@@ -254,10 +264,14 @@ class EPOS4:
                 return True
 
     def cyclic_mode(self):
-
         p_error_code = ctypes.c_uint()
 
         print("Wait finishing positioning...")
+
+        # Set Operation Mode PPM
+        self.epos.VCS_ActivateProfilePositionMode(
+            self.keyhandle, self.node_id, ctypes.byref(p_error_code)
+        )
 
         for x in range(1, 11):
             print("Loop: %d" % x)
@@ -281,8 +295,12 @@ class EPOS4:
         return True
 
     def set_position(self, pos):
-
         p_error_code = ctypes.c_uint()
+
+        # Set Operation Mode PPM
+        self.epos.VCS_ActivateProfilePositionMode(
+            self.keyhandle, self.node_id, ctypes.byref(p_error_code)
+        )
 
         self.epos.VCS_MoveToPosition(
             self.keyhandle, self.node_id, pos, 0, 0, ctypes.byref(p_error_code)
