@@ -5,7 +5,7 @@ import time
 class EPOS4:
     def __init__(self):
         # Get EPOS4 dynamic link library functions
-        path = "libraries/EposCmd64.dll"
+        path = "lib/EposCmd64.dll"
         ctypes.cdll.LoadLibrary(path)
         self.epos = ctypes.CDLL(path)
 
