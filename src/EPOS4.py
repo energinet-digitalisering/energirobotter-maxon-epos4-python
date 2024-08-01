@@ -3,11 +3,13 @@ import time
 
 
 class EPOS4:
-    def __init__(self):
+    def __init__(self, device_name="EPOS4"):
         # Get EPOS4 dynamic link library functions
         path = "lib/EposCmd64.dll"
         ctypes.cdll.LoadLibrary(path)
         self.epos = ctypes.CDLL(path)
+
+        self.device_name = device_name
 
         self.node_id = 1  # Node ID must match with Hardware Dip-Switch setting of EPOS4
         self.keyhandle = 0
@@ -47,16 +49,21 @@ class EPOS4:
             print("For more information see Firmware Specification")
             return False
 
-    def open_port(self):
+    def open_port(
+        self,
+        protocol_stack_name="MAXON SERIAL V2",
+        interface_name="USB",
+        port_name="USB0",
+    ):
         print("node_id: %d" % self.node_id)
         p_error_code = ctypes.c_uint()
 
         # Open USB Port
         self.keyhandle = self.epos.VCS_OpenDevice(
-            b"EPOS4",
-            b"MAXON SERIAL V2",
-            b"USB",
-            b"USB0",
+            self.device_name.encode("UTF-8"),  # Encode str to byte object
+            protocol_stack_name.encode("UTF-8"),
+            interface_name.encode("UTF-8"),
+            port_name.encode("UTF-8"),
             ctypes.byref(p_error_code),
         )
 
