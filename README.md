@@ -1,4 +1,4 @@
-# Maxon EPOS4 Python
+# Energirobotter Maxon EPOS4 Python
 
 Using `Python3` and the library `ctypes` to send commands to a Maxon EPOS4 using Maxon's dynamic link library. 
 
